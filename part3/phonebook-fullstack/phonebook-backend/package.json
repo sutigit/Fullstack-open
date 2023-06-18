@@ -9,7 +9,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:ui": "rm -rf build && cd ../phonebook/ && npm run build && cp -r build ../phonebook-backend/",
     "deploy": "/home/sutipong/.fly/bin/flyctl deploy",
-    "deploy:full": "npm run build:ui && npm run deploy",    
+    "deploy:full": "npm run build:ui && npm run deploy",
     "logs:prod": "/home/sutipong/.fly/bin/flyctl logs"
   },
   "author": "",
@@ -20,6 +20,7 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.18.2",
+    "mongoose": "^7.3.0",
     "morgan": "^1.10.0"
   }
 }
