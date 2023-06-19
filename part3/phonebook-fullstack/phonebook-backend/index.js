@@ -3,10 +3,14 @@ const morgan = require("morgan")
 const cors = require('cors')
 const app = express()
 
+const Person = require('./models/person')
+
 app.use(express.json())
 app.use(express.static('build'))
 app.use(morgan('tiny'))
 app.use(cors())
+
+
 
 let persons = [
     { 
@@ -32,7 +36,9 @@ let persons = [
 ]
 
 app.get('/api/persons', (request, response) => {
-    response.json(persons)
+    Person.find({}).then(persons => {
+        response.json(persons)
+    })
 })
 
 app.get('/api/persons/:id', (request, response) => {

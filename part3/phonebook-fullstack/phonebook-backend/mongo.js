@@ -1,31 +1,50 @@
 const mongoose = require('mongoose')
 
-if (process.argv.length<3) {
-  console.log('give password as argument')
+const password = process.argv[2]
+const name = process.argv[3]
+const number = process.argv[4]
+
+if (!password) {
+  console.log('missing password')
   process.exit(1)
 }
 
-const password = process.argv[2]
-
 const url =
-  `mongodb+srv://fullstack:${password}@cluster0.o1opl.mongodb.net/?retryWrites=true&w=majority`
+  `mongodb+srv://sutipong:${password}@cluster0.bkfpmeo.mongodb.net/phonebook?retryWrites=true&w=majority`
 
 mongoose.set('strictQuery',false)
 mongoose.connect(url)
 
-const noteSchema = new mongoose.Schema({
-  content: String,
-  important: Boolean,
+const personSchema = new mongoose.Schema({
+  name: String,
+  number: Number,
 })
 
-const Note = mongoose.model('Note', noteSchema)
+const Person = mongoose.model('Person', personSchema)
 
-const note = new Note({
-  content: 'HTML is Easy',
-  important: true,
-})
 
-note.save().then(result => {
-  console.log('note saved!')
-  mongoose.connection.close()
-})
+if (process.argv.length === 3) {
+
+  // Return all persons
+  Person.find({}).then(result => {
+    result.forEach(person => {
+      console.log(person)
+    })
+    mongoose.connection.close()
+  })
+
+} else {
+  // Save person
+  const person = new Person({
+    name: name,
+    number: number,
+  })
+  
+  // SAVE PERSON
+  person.save().then(result => {
+    console.log("phonebook:")
+    console.log(`added ${name} number ${number} to phonebook`)
+    mongoose.connection.close()
+  })
+  
+}
