@@ -1,3 +1,5 @@
+
+require('dotenv').config()  // This is needed to read the environment variables from the .env file.
 const express = require('express')
 const morgan = require("morgan")
 const cors = require('cors')
