@@ -13,7 +13,7 @@ export default function Persons({keyword, filteredPersons, persons, setPersons, 
         .catch(error => {
           console.log(error)
 
-          setNotification({message:`Information of ${persons.find(person => person.id === id).name} has already been removed from server`, type: "erorr"})
+          setNotification({message:`Information of ${persons.find(person => person.id === id).name} has already been removed from server`, type: "error"})
           setTimeout(() => {
             setNotification(null)
           }, 5000)

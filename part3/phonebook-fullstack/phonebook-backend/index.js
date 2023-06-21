@@ -17,7 +17,7 @@ app.get('/api/persons', (request, response, next) => {
     Person.find({}).then(persons => {
         response.json(persons)
     })
-    .catch(error => next(error))
+        .catch(error => next(error))
 })
 
 app.get('/api/persons/:id', (request, response, next) => {
@@ -28,36 +28,39 @@ app.get('/api/persons/:id', (request, response, next) => {
             response.status(404).end()
         }
     })
-    .catch(error => next(error))
+        .catch(error => next(error))
 })
 
 
-app.get('/info', (request, response) => {
-    response.send("<p>Phonebook has info for " + persons.length + " people</p>" + new Date())
+app.get('/info', (request, response, next) => {
+    Person.find({}).then(persons => {
+        response.send("<p>Phonebook has info for " + persons.length + " people</p>" + new Date())
+    })
+        .catch(error => next(error))
 })
 
 app.delete('/api/persons/:id', (request, response, next) => {
     Person.findByIdAndRemove(request.params.id)
-    .then(result => {
-        response.json(result)
-        response.status(204).end()
-    })
-    .catch(error => next(error))
+        .then(result => {
+            response.json(result)
+            response.status(204).end()
+        })
+        .catch(error => next(error))
 
 })
 
 app.post('/api/persons', (request, response, next) => {
     const body = request.body
-    
+
     const person = new Person({
-      name: body.name,
-      number: body.number || null,
+        name: body.name,
+        number: body.number || null,
     })
 
     person.save().then(savedPerson => {
-      response.json(savedPerson)
+        response.json(savedPerson)
     })
-    .catch(error => next(error))
+        .catch(error => next(error))
 })
 
 
@@ -70,10 +73,10 @@ app.put('/api/persons/:id', (request, response, next) => {
     }
 
     Person.findByIdAndUpdate(request.params.id, person, { new: true, runValidators: true, context: "query" })
-    .then(updatedPerson => {
-        response.json(updatedPerson)
-    })
-    .catch(error => next(error))
+        .then(updatedPerson => {
+            response.json(updatedPerson)
+        })
+        .catch(error => next(error))
 })
 
 
@@ -90,7 +93,7 @@ const errorHandler = (error, request, response, next) => {
     next(error)
 }
 
-  // this has to be the last loaded middleware.
+// this has to be the last loaded middleware.
 app.use(errorHandler)
 
 

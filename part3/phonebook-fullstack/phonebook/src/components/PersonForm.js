@@ -28,6 +28,7 @@ export default function PersonForm({ persons, setPersons, newName, setNewName, n
                 }, 5000);
             })
             .catch(error => {
+                setNotification({message: error.message, type: "error"})
                 console.log(error)
             })
             
@@ -47,6 +48,7 @@ export default function PersonForm({ persons, setPersons, newName, setNewName, n
                 }, 5000);
             })
             .catch(error => {
+                setNotification({message: error.message, type: "error"})
                 console.log(error)
             })
         }
