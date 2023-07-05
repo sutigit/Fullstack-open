@@ -4,6 +4,7 @@ const app = require('../app')
 
 const api = supertest(app)
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 const initialBlogs = [
     {
@@ -26,8 +27,32 @@ const initialBlogs = [
     },
 ]
 
+let token;
+
 beforeEach(async () => {
     await Blog.deleteMany({})
+    await User.deleteMany({})
+
+    // create user
+    await api.
+        post('/api/users')
+        .send({
+            username: "test",
+            name: "test",
+            password: "test"
+        })
+        .expect(201)
+
+    // login
+    const response = await api
+        .post('/api/login')
+        .send({
+            username: "test",
+            password: "test"
+        })
+        .expect(200)
+
+    token = response.body.token
 
     const blog1 = new Blog(initialBlogs[0])
     await blog1.save()
@@ -41,16 +66,22 @@ beforeEach(async () => {
 
 describe("Blog list tests, step1", () => {
     // Test to be JSON
-    test('notes are returned as json', async () => {
+    test('blogs are returned as json', async () => {
         await api
             .get('/api/blogs')
+            .set('Authorization', `Bearer ${token}`)
             .expect(200)
             .expect('Content-Type', /application\/json/)
+
     }, 100000)
 
     // Test correct amount of posts
-    test('all notes are returned', async () => {
-        const response = await api.get('/api/blogs')
+    test('all blogs are returned', async () => {
+        const response = await api
+            .get('/api/blogs')
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+
         expect(response.body).toHaveLength(3)
     })
 })
@@ -58,7 +89,11 @@ describe("Blog list tests, step1", () => {
 describe("Blog list tests, step2", () => {
     // Test that the unique identifier property of the blog posts is named id
     test('id is defined', async () => {
-        const response = await api.get('/api/blogs')
+        const response = await api
+            .get('/api/blogs')
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+        
         expect(response.body[0].id).toBeDefined()
     })
 })
@@ -74,13 +109,20 @@ describe("Blog list tests, step3", () => {
             likes: 4
         }
 
+
         await api
             .post('/api/blogs')
             .send(newBlog)
+            .set('Authorization', `Bearer ${token}`)
             .expect(201)
             .expect('Content-Type', /application\/json/)
 
-        const response = await api.get('/api/blogs')
+        const response = await api
+            .get('/api/blogs')
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+
         expect(response.body).toHaveLength(initialBlogs.length + 1)
     })
 })
@@ -98,6 +140,7 @@ describe("Blog list tests, step4", () => {
         const response = await api
             .post('/api/blogs')
             .send(newBlog)
+            .set('Authorization', `Bearer ${token}`)
             .expect(201)
             .expect('Content-Type', /application\/json/)
 
@@ -116,6 +159,24 @@ describe("Blog list tests, step5", () => {
         await api
             .post('/api/blogs')
             .send(newBlog)
+            .set('Authorization', `Bearer ${token}`)
+            .expect(400)
+    })
+})
+
+describe("Blog fails properly", () => {
+    test('fails with status code 401 if token is not provided', async () => {
+        const newBlog = {
+            title: "test5",
+            author: "author5",
+            url: "url5",
+            likes: 4
+        }
+
+        await api
+            .post('/api/blogs')
+            .send(newBlog)
+            .set('Authorization', `Bearer `)
             .expect(400)
     })
 })
