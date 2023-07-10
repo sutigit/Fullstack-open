@@ -3,61 +3,106 @@ import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
 
+// My components
+import Notification from './components/Notification'
+import BlogForm from './components/BlogForm'
+
 const App = () => {
+  const [notification, setNotification] = useState(null)
   const [blogs, setBlogs] = useState([])
-  const [username, setUsername] = useState('') 
-  const [password, setPassword] = useState('') 
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
+  const [blogFormVisible, setBlogFormVisible] = useState(false)
+
+
+
 
   useEffect(() => {
-    // blogService.getAll().then(blogs =>
-    //   setBlogs( blogs )
-    // )  
-    console.log("backend not connected yet")
+    const loggedUserJSON = window.localStorage.getItem('loggedBlogListUser')
+    if (loggedUserJSON) {
+      const user = JSON.parse(loggedUserJSON)
+      setUser(user)
+      blogService.setToken(user.token)
+    }
   }, [])
+
+  useEffect(() => {
+    if (user === null) return
+
+    const payload = {
+      token: user.token,
+      username: user.username,
+      name: user.name
+    }
+
+    blogService.getAll(payload)
+      .then(blogs => {
+        setBlogs( blogs )
+      })
+      .catch(error => {
+        console.log('error', error)
+      })
+  }, [user])
 
   const handleLogin = async (event) => {
     event.preventDefault()
-    
+
     try {
-      const user = await loginService.login({
+      const loginUser = await loginService.login({
         username, password,
       })
-      setUser(user)
+
+      blogService.setToken(loginUser.token)
+
+      setUser(loginUser)
       setUsername('')
       setPassword('')
-    } catch (exception) {
-      setErrorMessage('Wrong credentials')
+
+      window.localStorage.setItem(
+        'loggedBlogListUser', JSON.stringify(loginUser)
+      )
+
+      setNotification({ message: `Welcome ${loginUser.name}`, type: 'success' })
       setTimeout(() => {
-        setErrorMessage(null)
+        setNotification(null)
+      }, 5000)
+    } catch (exception) {
+      setNotification({ message: 'Wrong credentials', type: 'error' })
+      setTimeout(() => {
+        setNotification(null)
       }, 5000)
     }
+  }
 
   if (user === null) {
     return (
       <div>
         <h2>Log in to application</h2>
+
+        {notification !== null && Notification(notification)}
+
         <form onSubmit={handleLogin}>
-        <div>
+          <div>
           username
             <input
-            type="text"
-            value={username}
-            name="Username"
-            onChange={({ target }) => setUsername(target.value)}
-          />
-        </div>
-        <div>
+              type="text"
+              value={username}
+              name="Username"
+              onChange={({ target }) => setUsername(target.value)}
+            />
+          </div>
+          <div>
           password
             <input
-            type="password"
-            value={password}
-            name="Password"
-            onChange={({ target }) => setPassword(target.value)}
-          />
-        </div>
-        <button type="submit">login</button>
-      </form>
+              type="password"
+              value={password}
+              name="Password"
+              onChange={({ target }) => setPassword(target.value)}
+            />
+          </div>
+          <button type="submit">login</button>
+        </form>
       </div>
     )
   }
@@ -65,9 +110,39 @@ const App = () => {
   return (
     <div>
       <h2>blogs</h2>
-      {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
-      )}
+
+      {notification !== null && Notification(notification)}
+
+      <div>
+        {user.name} logged in &nbsp;
+        <button onClick={() => {
+          window.localStorage.removeItem('loggedBlogListUser')
+          setUser(null)
+        }}>logout</button>
+      </div>
+      <br />
+
+      { blogFormVisible ?
+        <BlogForm
+          blogs={blogs}
+          setBlogs={setBlogs}
+          setNotification={setNotification}
+          setBlogFormVisible={setBlogFormVisible}
+        /> :
+        <button onClick={() => setBlogFormVisible(true)}>Add blog</button>
+      }
+
+      {blogs
+        .sort((a, b) => b.likes - a.likes)
+        .map(blog =>
+          <Blog
+            key={blog.id}
+            blog={blog}
+            blogs={blogs}
+            setBlogs={setBlogs}
+            setNotification={setNotification}
+          />
+        )}
     </div>
   )
 }
