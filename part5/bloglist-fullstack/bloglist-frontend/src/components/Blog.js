@@ -6,17 +6,19 @@ export default function Blog({ blog, blogs, setBlogs, setNotification }) {
 
   const [visible, setVisible] = useState(false)
   const [likes, setLikes] = useState(blog.likes)
-  const [showRemoveButton, setShowRemoveButton] = useState(false)
+  const [visibleRemove, setVisibleRemove] = useState(false)
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogListUser')
     if (loggedUserJSON) {
-      const user = JSON.parse(loggedUserJSON)
-      if (user.id === blog.user.id) {
-        setShowRemoveButton(true)
+      const loggedUser = JSON.parse(loggedUserJSON)
+      console.log('loggedUser', loggedUser.id)
+      console.log('blog.user', blog.user[0].id)
+      if (loggedUser.id === blog.user[0].id) {
+        setVisibleRemove(true)
       }
     }
-  }, [blog.user.id])
+  }, [])
 
   const handleLike = async () => {
     const payload = {
@@ -92,7 +94,7 @@ export default function Blog({ blog, blogs, setBlogs, setNotification }) {
         <div>
           {blog.user.map((user, index) => <div key={index}>{user.name}</div>)}
         </div>
-        {showRemoveButton && <button onClick={removeBlog}>remove</button>}
+        {visibleRemove && <button onClick={removeBlog}>remove</button>}
       </div>
     </div>
   )

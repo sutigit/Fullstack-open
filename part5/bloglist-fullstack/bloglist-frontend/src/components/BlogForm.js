@@ -26,7 +26,8 @@ const BlogForm = ({ blogs, setBlogs, setNotification, setBlogFormVisible }) => {
       const loggedUserJSON = window.localStorage.getItem('loggedBlogListUser')
       const user = JSON.parse(loggedUserJSON)
 
-      newBlog.user.push(user)
+      // add user to new blog
+      newBlog.user = [user]
 
       setBlogs(blogs.concat(newBlog))
       setTitle('')
@@ -61,6 +62,7 @@ const BlogForm = ({ blogs, setBlogs, setNotification, setBlogFormVisible }) => {
         <div>
                     title:
           <input
+            id="title"
             value={title}
             onChange={({ target }) => setTitle(target.value)}
           />
@@ -68,6 +70,7 @@ const BlogForm = ({ blogs, setBlogs, setNotification, setBlogFormVisible }) => {
         <div>
                     author:
           <input
+            id="author"
             value={author}
             onChange={({ target }) => setAuthor(target.value)}
           />
@@ -75,12 +78,13 @@ const BlogForm = ({ blogs, setBlogs, setNotification, setBlogFormVisible }) => {
         <div>
                     url:
           <input
+            id="url"
             value={url}
             onChange={({ target }) => setUrl(target.value)}
           />
         </div>
-        <button type="submit">create</button>
-        <button onClick={cancel}>cancel</button>
+        <button id="create" type="submit">create</button>
+        <button id="cancel" onClick={cancel}>cancel</button>
       </form>
     </div>
   )

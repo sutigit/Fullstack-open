@@ -16,14 +16,15 @@ const App = () => {
   const [blogFormVisible, setBlogFormVisible] = useState(false)
 
 
-
-
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogListUser')
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
       setUser(user)
       blogService.setToken(user.token)
+    } else {
+      console.log('no user')
+      setUser(null)
     }
   }, [])
 
@@ -75,36 +76,45 @@ const App = () => {
     }
   }
 
-  if (user === null) {
-    return (
-      <div>
-        <h2>Log in to application</h2>
+  const LoginForm = () => (
+    <div>
+      <h2>Log in to application</h2>
 
-        {notification !== null && Notification(notification)}
+      {notification !== null && Notification(notification)}
 
-        <form onSubmit={handleLogin}>
-          <div>
+      <form onSubmit={handleLogin}>
+        <div>
           username
-            <input
-              type="text"
-              value={username}
-              name="Username"
-              onChange={({ target }) => setUsername(target.value)}
-            />
-          </div>
-          <div>
+          <input
+            type="text"
+            id='username'
+            value={username}
+            name="Username"
+            onChange={({ target }) => setUsername(target.value)}
+          />
+        </div>
+        <div>
           password
-            <input
-              type="password"
-              value={password}
-              name="Password"
-              onChange={({ target }) => setPassword(target.value)}
-            />
-          </div>
-          <button type="submit">login</button>
-        </form>
-      </div>
-    )
+          <input
+            type="password"
+            id="password"
+            value={password}
+            name="Password"
+            onChange={({ target }) => setPassword(target.value)}
+          />
+        </div>
+        <button
+          id='login'
+          type="submit"
+        >
+          login
+        </button>
+      </form>
+    </div>
+  )
+
+  if (user === null) {
+    return LoginForm()
   }
 
   return (
@@ -132,17 +142,19 @@ const App = () => {
         <button onClick={() => setBlogFormVisible(true)}>Add blog</button>
       }
 
-      {blogs
-        .sort((a, b) => b.likes - a.likes)
-        .map(blog =>
-          <Blog
-            key={blog.id}
-            blog={blog}
-            blogs={blogs}
-            setBlogs={setBlogs}
-            setNotification={setNotification}
-          />
-        )}
+      <div className='blogs'>
+        {blogs
+          .sort((a, b) => b.likes - a.likes)
+          .map(blog =>
+            <Blog
+              key={blog.id}
+              blog={blog}
+              blogs={blogs}
+              setBlogs={setBlogs}
+              setNotification={setNotification}
+            />
+          )}
+      </div>
     </div>
   )
 }
